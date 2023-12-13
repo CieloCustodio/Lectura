@@ -1,0 +1,199 @@
+---
+title: "AFDMD-111 Estadística"
+subtitle: "Lectura de archivos en R"
+author: "Custodio Vidal Cielo"
+date: "20/09/2023"
+output:
+  rmdformats::material:
+    highlight: kate
+    cards: false
+---
+
+
+```{r knitr_init, echo=FALSE, message=TRUE, cache=FALSE, warnings=F}
+library(knitr)
+library(rmdformats)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+# Lectura de archivos en R
+
+`R` puede leer una gran cantidad de archivos incluyendo archivos `.txt`, `.csv`, `.xls`, `.pdf`, etc. Mediante el uso del paquete `tabulizer` se pueden leer tablas que se encuentran en documentos `PDF`. En la siguiente actividad se instalará y cargará el paquete `tabulizer` mediante los comandos:
+
+```{r eval=FALSE}
+install.packages("tabulizer", dependencies = TRUE)   # Instala tabulizer
+library(tabulizer)                                   # Carga tabulizer
+
+```
+
+Posteriormente se leerá la tabla localizada en el archivo `seccion_calificacionesmsosa247.pdf` que se encuentra en la sección de **archivos** del *Teams* (lo anterior se puede hacer mediante el comando `extract_tables` del tabulizer). Una vez cargada la tabla que se llamará `tablaAlumnos` se realizarán las siguientes actividades:
+
+1.- Graficar `No` contra `Parcial 1`.
+
+```{r}
+library(tabulizer)
+tap<-extract_tables("seccion_calificacionesmsosa247.pdf", output = "data.frame")
+tap<- tap [[1]] 
+names(tap) 
+names(tap)<- c("No", "Matricula", "Nombre", "parcial1", "parcial2", "parcial3", "promedio")
+head(tap)
+names(tap)
+tap$parcial1
+plot(tap$No, tap$parcial1,type = "l")
+
+```
+
+
+2.- Graficar `No` contra `Parcial 2`.
+
+```{r}
+library(tabulizer)
+tap<-extract_tables("seccion_calificacionesmsosa247.pdf", output = "data.frame")
+tap<- tap [[1]] 
+names(tap) 
+names(tap)<- c("No", "Matricula", "Nombre", "parcial1", "parcial2", "parcial3", "promedio")
+head(tap)
+names(tap)
+tap$parcial2
+plot(tap$No, tap$parcial2,type = "l")
+
+```
+
+
+3.- Renombrar `Ev.` a `Parcial 3` (mostrar el `data.frame` resultante).
+
+```{r}
+# Cargar la biblioteca necesaria
+library(tabulizer)
+
+# Extraer las tablas del archivo PDF
+tap <- extract_tables("seccion_calificacionesmsosa247.pdf", output = "data.frame")
+tap <- tap[[1]]
+
+# Renombrar las columnas de la tabla
+names(tap) <- c("No", "Matricula", "Nombre", "parcial1", "parcial2", "parcial3", "promedio")
+
+# Mostrar las primeras filas de la tabla
+head(tap)
+
+# Graficar No contra Parcial 1
+plot(tap$No, tap$parcial1, type = "l")
+
+# Graficar No contra Parcial 2
+plot(tap$No, tap$parcial2, type = "l")
+
+# Renombrar la columna 'Ev.' a 'Parcial 3'
+tap$parcial3 <- tap$`Ev.`
+
+# Eliminar la columna 'Ev.'
+tap <- tap[, -which(names(tap) == 'Ev.')]
+
+# Mostrar el data.frame resultante
+head(tap)
+
+```
+
+
+4.- Graficar `No` contra `Parcial 1`, `Parcial 2`.
+```{r}
+
+# Cargar la biblioteca necesaria
+library(tabulizer)
+
+# Extraer las tablas del archivo PDF
+tap <- extract_tables("seccion_calificacionesmsosa247.pdf", output = "data.frame")
+tap <- tap[[1]]
+
+# Renombrar las columnas de la tabla
+names(tap) <- c("No", "Matricula", "Nombre", "parcial1", "parcial2", "parcial3", "promedio")
+
+# Mostrar las primeras filas de la tabla
+head(tap)
+
+# Graficar No contra Parcial 1
+plot(tap$No, tap$parcial1, type = "l", col = "blue", xlab = "No", ylab = "Parcial 1")
+
+# Agregar la línea de Parcial 2 a la misma gráfica
+lines(tap$No, tap$parcial2, type = "l", col = "red")
+
+# Agregar una leyenda
+legend("topright", legend = c("Parcial 1", "Parcial 2"), col = c("blue", "red"), lty = 1)
+
+# Título de la gráfica
+title("Gráfica de Parcial 1 y Parcial 2")
+
+```
+
+5.- ¿Cuál es la media de las calificaciones finales? ¿Quién obtuvo la calificación más baja? ¿Quién obtuvo el mejor promedio? (anexar el código que lo calcula).
+
+```{r}
+
+# Cargar la biblioteca necesaria
+library(tabulizer)
+
+# Extraer las tablas del archivo PDF
+tap <- extract_tables("seccion_calificacionesmsosa247.pdf", output = "data.frame")
+tap <- tap[[1]]
+
+# Renombrar las columnas de la tabla
+names(tap) <- c("No", "Matricula", "Nombre", "parcial1", "parcial2", "parcial3", "promedio")
+
+# Calcular la media de las calificaciones finales
+media_final <- mean(tap$promedio)
+cat("La MEDIA de las calificaciones finales es:", media_final, "\n")
+
+# Encontrar estudiantes con la calificación más baja
+calificacion_minima <- min(tap$promedio)
+estudiantes_minimos <- tap[tap$promedio == calificacion_minima, "Nombre"]
+cat("Los estudiantes con la calificación MAS BAJA son:", paste(estudiantes_minimos, collapse = ", "), "con una calificación de", calificacion_minima, "\n")
+
+# Encontrar estudiantes con el mejor promedio
+calificacion_maxima <- max(tap$promedio)
+estudiantes_maximos <- tap[tap$promedio == calificacion_maxima, "Nombre"]
+cat("Los estudiantes con el MEJOR PROMEDIO son:", paste(estudiantes_maximos, collapse = ", "), "con una calificación de", calificacion_maxima, "\n")
+
+
+```
+
+6.- Cree una nueva columna llamada `promedio` (esto lo puede hacer con `mutate` del paquete `dplyr`) y compárela con la columna `Calif.` (¿Qué se puede observar?).
+
+```{r}
+# Cargar las bibliotecas necesarias
+library(tabulizer)
+library(dplyr)
+
+# Extraer las tablas del archivo PDF
+tap <- extract_tables("seccion_calificacionesmsosa247.pdf", output = "data.frame")
+tap <- tap[[1]]
+
+# Renombrar las columnas de la tabla
+names(tap) <- c("No", "Matricula", "Nombre", "parcial1", "parcial2", "parcial3", "Calif.")
+
+# Convertir la columna "Calif." a numérica (si es necesario)
+tap$Calif. <- as.numeric(tap$Calif.)
+
+# Crear una nueva columna llamada "promedio" calculada como el promedio de las columnas de parciales
+tap <- tap %>%
+  mutate(promedio = (parcial1 + parcial2 + parcial3) / 3)
+
+# Comparar la columna "promedio" con la columna "Calif."
+comparison <- tap %>%
+  select(promedio, Calif.)
+
+# Imprimir los primeros registros de la comparación
+head(comparison)
+
+```
+Se observa que en "promedio" las calificaciones nos dan decimales y si por ejemplo el promedio es 7.33333 en la "calificacion" se cerrara como 7 pero si el "promedio" es 8.6666 la "calificacion" se cerrara en 9.
+
+Posteriormente lea el archivo `it0103_2016_01.csv` (lo puede hacer mediante el comando `read.csv()`) el cual es una versión `sucia` del archivo anterior y replique cada uno de los puntos de arriba (sí es necesario modifique el data.frame resultante).
